@@ -58,6 +58,13 @@
   </section>
 </main>
 
+<section class="wrap about-panel" aria-label="About this project">
+  <h2>About this project</h2>
+  <p>I built DevMetric because the number I kept wanting — how much of a GitHub profile is <em>original work</em>, and in which languages — is not shown anywhere on GitHub itself. The interesting constraint is the API's 60-requests/hour unauthenticated limit: the obvious way to get a language breakdown (one <code>/languages</code> call per repository) burns that quota on a single profile. DevMetric aggregates the repository list it already fetched instead, so a full analysis costs two or three calls — and repeat views are served through ETag conditional requests that GitHub does not count against the limit at all.</p>
+  <p>Part of a series of small, dependency-free apps I built against free public APIs to practise working within real rate limits and payload shapes.</p>
+  <p class="about-sign">— <a href="https://github.com/abduIwahid" target="_blank" rel="noopener">Abdul Wahid</a> · BS Artificial Intelligence, COMSATS University Islamabad (Attock Campus) · <a href="https://www.abdulwahid.me" target="_blank" rel="noopener">abdulwahid.me</a></p>
+</section>
+
 <footer class="site-footer">
   <div class="wrap">
     <p>Data from the <a href="https://docs.github.com/en/rest" target="_blank" rel="noopener">GitHub REST API</a> (public data only). Repeat views are served through ETag conditional requests, which do not count against the rate limit when nothing changed.</p>

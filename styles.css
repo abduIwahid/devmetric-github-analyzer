@@ -86,3 +86,8 @@ a { color: var(--accent-dark); }
   .panel { padding: 16px; }
   .lang-row { grid-template-columns: 88px 1fr 40px; }
 }
+
+.about-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin: 26px auto 0; box-sizing: border-box; width: calc(100% - 32px); }
+.about-panel h2 { margin-top: 0; }
+.about-panel code { background: var(--surface-alt); padding: 1px 5px; border-radius: 5px; font-size: 0.92em; }
+.about-sign { color: var(--text-muted); margin-bottom: 0; }

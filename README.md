@@ -1,5 +1,8 @@
 # DevMetric — GitHub Profile Analyzer
 
+> Built by [Abdul Wahid](https://github.com/abduIwahid) — BS Artificial Intelligence student at COMSATS University Islamabad (Attock Campus). One of a series of dependency-free apps I built against free public APIs to practise real-world API constraints: rate limits, caching, and payload normalisation. More at [abdulwahid.me](https://www.abdulwahid.me).
+
+
 Enter any GitHub username and get a real analysis: profile summary, language breakdown, top and most recent repositories, total stars and forks — plus live rate-limit status. Recruiters can try it with their own username; the link is shareable (`?user=anyone`).
 
 **Live demo:** _TBD — deploy pending owner decision (GitHub Pages or Vercel static)._
@@ -8,6 +11,7 @@ Run it locally: serve the folder (`python3 -m http.server`) and visit `http://lo
 ## Features
 
 - **Profile card** — avatar, name, bio, followers/following, public repo count, account age.
+- **Footprint panel** — the share of the account that is original work rather than forks, how many own repos were pushed in the last year, and the most-used language.
 - **Full repo sweep** — paginates `per_page=100` until a short page (capped at 5 pages / 500 repos).
 - **Language breakdown** — bar chart drawn with plain divs (no chart library), computed from the repo list's own `language` field, forks and null languages excluded.
 - **Top 5 by stars + 5 most recently pushed**, with totals for stars and forks across own repositories.
@@ -30,6 +34,6 @@ Public data from the [GitHub REST API](https://docs.github.com/en/rest), used un
 
 ## Trade-offs
 
-- Language share is repo-count-based, not byte-based — the honest cost of avoiding N+1 calls at a 60/hour limit. The UI labels it as such.
+- Language share is the share of own repos *with a detected language* (the denominator is stated in the UI), repo-count-based rather than byte-based — the honest cost of avoiding N+1 calls at a 60/hour limit.
 - ETag cache entries live in localStorage (≈5 MB shared quota); very heavy use may evict older entries, which degrades to normal fetching, never to an error.
 - The 500-repo cap means extremely prolific accounts are analysed on their first 500 repos (the API's default order), which the code states openly.
