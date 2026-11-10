@@ -1,0 +1,88 @@
+/* DevMetric — design tokens
+   Base: terminal ink on white. One accent: signal green #1F883D (GitHub's own green).
+   Solid colours only. */
+:root {
+  --bg: #F6F7F5;
+  --surface: #FFFFFF;
+  --surface-alt: #ECEEEA;
+  --ink: #0D1117;
+  --text: #1A1D21;
+  --text-on-ink: #E6EDF3;
+  --text-muted: #5A6068;
+  --border: #D5D9D2;
+  --accent: #1F883D;
+  --accent-dark: #14632A;
+  --danger: #B3261E;
+  --danger-soft: #FBEAEA;
+  --warning-bg: #FFF4D6;
+  --focus: #1A56C4;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(13, 17, 23, 0.12);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; line-height: 1.5; }
+.wrap { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 16px; }
+a { color: var(--accent-dark); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.site-header { background: var(--ink); color: var(--text-on-ink); padding: 28px 0; }
+.site-header h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.4rem); }
+.tagline { margin: 6px 0 0; color: #9BA7B1; }
+
+.offline-banner { background: var(--warning-bg); color: #5C4500; border-bottom: 2px solid #E0B400; padding: 10px 16px; text-align: center; font-weight: 600; }
+.state-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 20px; text-align: center; margin: 18px 0; }
+.state-box h2 { margin-top: 0; }
+.state-error { border-color: var(--danger); background: var(--danger-soft); }
+.status-region { min-height: 1.5em; color: var(--text-muted); margin: 12px 0 2px; }
+
+.search-panel { padding: 20px 0 4px; }
+.search-panel label { font-weight: 700; display: block; margin-bottom: 8px; }
+.search-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.search-row input { flex: 1 1 220px; padding: 11px 12px; font-size: 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); }
+.btn { background: var(--accent); color: #FFFFFF; border: 1px solid var(--accent); padding: 11px 18px; border-radius: var(--radius); font-size: 1rem; cursor: pointer; font-weight: 600; }
+.btn:hover { background: var(--accent-dark); }
+.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-secondary:hover { background: var(--surface-alt); }
+.settings { margin-top: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 10px 14px; }
+.settings summary { cursor: pointer; font-weight: 600; }
+.settings-body { padding-top: 10px; }
+.hint { color: var(--text-muted); font-size: 0.92rem; margin: 8px 0 0; }
+.quota-line { font-weight: 600; margin: 14px 0 0; min-height: 1.5em; }
+.quota-line.low { color: var(--danger); }
+
+.profile-card { display: flex; gap: 20px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin: 14px 0; box-shadow: var(--shadow); }
+.profile-card img { width: 110px; height: 110px; border-radius: 50%; border: 2px solid var(--border); }
+.profile-main { flex: 1 1 260px; min-width: 0; }
+.profile-main h2 { margin: 0; font-size: 1.5rem; overflow-wrap: anywhere; }
+.profile-main .login { color: var(--text-muted); margin: 2px 0 8px; }
+.profile-main .bio { margin: 0 0 12px; }
+.stat-grid { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.stat-grid .stat b { display: block; font-size: 1.25rem; }
+.stat-grid .stat span { color: var(--text-muted); font-size: 0.88rem; }
+
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin: 14px 0; }
+.panel h3 { margin-top: 0; }
+.lang-row { display: grid; grid-template-columns: 110px 1fr 44px; gap: 10px; align-items: center; margin: 7px 0; }
+.lang-track { background: var(--surface-alt); height: 14px; border-radius: 999px; overflow: hidden; }
+.lang-fill { background: var(--accent); height: 100%; }
+.lang-row .pct { text-align: right; color: var(--text-muted); font-size: 0.9rem; }
+.repo-list { list-style: none; margin: 0; padding: 0; }
+.repo-list li { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.repo-list li:last-child { border-bottom: none; }
+.repo-list .rname { font-weight: 700; overflow-wrap: anywhere; }
+.repo-list .rmeta { color: var(--text-muted); font-size: 0.9rem; }
+.repo-list .rdesc { margin: 3px 0 0; }
+
+.skeleton { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin: 14px 0; }
+.skel { background: var(--surface-alt); border-radius: 6px; }
+.skel-avatar { width: 110px; height: 110px; border-radius: 50%; }
+.skel-line { height: 16px; width: 60%; margin-top: 14px; }
+.skel-line.short { width: 35%; }
+
+.site-footer { border-top: 1px solid var(--border); padding: 18px 0 26px; color: var(--text-muted); font-size: 0.92rem; margin-top: 26px; }
+@media (max-width: 480px) {
+  .profile-card { padding: 16px; }
+  .panel { padding: 16px; }
+  .lang-row { grid-template-columns: 88px 1fr 40px; }
+}

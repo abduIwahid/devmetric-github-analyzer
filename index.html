@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevMetric — GitHub Profile Analyzer</title>
+<meta name="description" content="Analyse any GitHub profile: language breakdown, top repositories, totals and rate-limit status. GitHub REST API, vanilla JavaScript, ETag caching.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <h1>DevMetric</h1>
+    <p class="tagline">GitHub Profile Analyzer — paste a username, get the numbers that matter.</p>
+  </div>
+</header>
+
+<div id="offline-banner" class="offline-banner" role="alert" hidden>
+  You are offline. New analyses need a connection; profiles you already viewed may load from cache.
+</div>
+
+<main class="wrap">
+  <section class="search-panel" aria-label="Analyse a profile">
+    <form id="search-form">
+      <label for="username-input">GitHub username</label>
+      <div class="search-row">
+        <input id="username-input" type="text" value="abduIwahid" placeholder="e.g. torvalds, gaearon, abduIwahid" autocomplete="off" spellcheck="false">
+        <button class="btn" type="submit">Analyse</button>
+      </div>
+    </form>
+    <details class="settings">
+      <summary>Optional: GitHub token (raises the limit from 60 to 5,000 requests/hour)</summary>
+      <div class="settings-body">
+        <label for="token-input">Personal access token — stored only in this browser's localStorage, sent only to api.github.com</label>
+        <div class="search-row">
+          <input id="token-input" type="password" placeholder="ghp_… (leave empty to go tokenless)" autocomplete="off">
+          <button id="token-save" class="btn btn-secondary" type="button">Save token</button>
+          <button id="token-clear" class="btn btn-secondary" type="button">Clear</button>
+        </div>
+        <p id="token-status" class="hint"></p>
+      </div>
+    </details>
+    <p id="quota-line" class="quota-line" role="status"></p>
+  </section>
+
+  <section aria-label="Results">
+    <div id="status-region" class="status-region" role="status" aria-live="polite"></div>
+    <div id="results-region"></div>
+    <div id="empty-state" class="state-box" hidden>
+      <h2>User not found</h2>
+      <p id="empty-text">GitHub returned 404 for that username. Check the spelling and try again.</p>
+    </div>
+    <div id="error-state" class="state-box state-error" hidden>
+      <h2>Something went wrong</h2>
+      <p id="error-text">The request failed.</p>
+      <button id="error-retry" class="btn" type="button">Try again</button>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Data from the <a href="https://docs.github.com/en/rest" target="_blank" rel="noopener">GitHub REST API</a> (public data only). Repeat views are served through ETag conditional requests, which do not count against the rate limit when nothing changed.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
