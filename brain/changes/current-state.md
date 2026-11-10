@@ -7,3 +7,4 @@
 **Verified:** app.js syntax (node --check); mapper fields + rate-limit headers + ETag 304 behaviour against the live GitHub API (user `abduIwahid`).
 
 **Pending:** GitHub repo creation + deploy (owner decision: GitHub Pages vs Vercel); README demo GIF after deploy; Phase 2 level-up (two-user compare).
+- 2026-11-10 (later): Footprint panel + language-share denominator fix + first-person About section shipped. Next: hosting choice (Pages vs Vercel) still open; two-user compare remains the Phase 2 candidate.

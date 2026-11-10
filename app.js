@@ -131,9 +131,19 @@ function aggregateRepos(repos) {
     totalForks += r.forks_count || 0;
     if (r.language) langCounts.set(r.language, (langCounts.get(r.language) || 0) + 1);
   }
+  const withLang = own.filter((r) => r.language).length;
   const languages = Array.from(langCounts.entries())
-    .map(([name, count]) => ({ name, count, pct: own.length ? Math.round(count / own.length * 100) : 0 }))
+    .map(([name, count]) => ({ name, count, pct: withLang ? Math.round(count / withLang * 100) : 0 }))
     .sort((a, b) => b.count - a.count);
+  // Footprint stats: honest shares the language chart cannot show —
+  // how much of the account is original work, and how current it is.
+  const now = Date.now();
+  const activeYear = own.filter((r) => now - new Date(r.pushed_at).getTime() < 365.25 * 24 * 3600 * 1000).length;
+  const footprint = {
+    originalPct: repos.length ? Math.round(own.length / repos.length * 100) : 0,
+    activeYear,
+    topLanguage: languages.length ? languages[0].name : '—',
+  };
   const mapRepo = (r) => ({
     name: r.name,
     url: r.html_url,
@@ -145,7 +155,7 @@ function aggregateRepos(repos) {
   });
   const topByStars = own.slice().sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0)).slice(0, 5).map(mapRepo);
   const recent = own.slice().sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at)).slice(0, 5).map(mapRepo);
-  return { totalRepos: repos.length, ownCount: own.length, totalStars, totalForks, languages, topByStars, recent };
+  return { totalRepos: repos.length, ownCount: own.length, totalStars, totalForks, languages, topByStars, recent, footprint };
 }
 
 /* ---------- load ---------- */
@@ -228,7 +238,12 @@ function renderResults(profile, agg) {
     '<div class="stat"><b>' + agg.totalStars + '</b><span>Total stars (own repos)</span></div>' +
     '<div class="stat"><b>' + agg.totalForks + '</b><span>Total forks (own repos)</span></div>' +
     '</div></div></article>' +
-    '<section class="panel"><h3>Language breakdown <span style="color:var(--text-muted);font-weight:400">(own repos only, forks excluded)</span></h3>' + langs + '</section>' +
+    '<section class="panel"><h3>Language breakdown <span style="color:var(--text-muted);font-weight:400">(share of own repos with a detected language)</span></h3>' + langs + '</section>' +
+    '<section class="panel"><h3>Footprint</h3><div class="stat-grid">' +
+    '<div class="stat"><b>' + agg.footprint.originalPct + '%</b><span>Original work (not forks)</span></div>' +
+    '<div class="stat"><b>' + agg.footprint.activeYear + '</b><span>Own repos pushed in the last year</span></div>' +
+    '<div class="stat"><b>' + esc(agg.footprint.topLanguage) + '</b><span>Most-used language</span></div>' +
+    '</div></section>' +
     '<section class="panel"><h3>Top repositories by stars</h3><ul class="repo-list">' +
     (agg.topByStars.length ? agg.topByStars.map(repoLi).join('') : '<li>No repositories found.</li>') + '</ul></section>' +
     '<section class="panel"><h3>Most recently pushed</h3><ul class="repo-list">' +
