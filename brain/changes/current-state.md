@@ -9,3 +9,4 @@
 **Pending:** GitHub repo creation + deploy (owner decision: GitHub Pages vs Vercel); README demo GIF after deploy; Phase 2 level-up (two-user compare).
 - 2026-11-10 (later): Footprint panel + language-share denominator fix + first-person About section shipped. Next: hosting choice (Pages vs Vercel) still open; two-user compare remains the Phase 2 candidate.
 - 2026-11-11: Owner deployed DevMetric to GitHub Pages himself (abduiwahid.github.io/devmetric-github-analyzer) — the personal pass (Footprint + About) is confirmed live there. README live-demo line updated. Pages status of the other four repos was not enabled as of this check (404); deployment stays the owner's call.
+- 2026-11-11: Frontend redesign v2 shipped (dark hero, stat tiles, type system). Functionality unchanged. Owner guidance still open: Pages ON for the other four repos (his clicks); his own TMDB token unlocks CineLog's live check; nothing else needed from him for these five.

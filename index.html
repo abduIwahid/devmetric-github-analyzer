@@ -5,15 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DevMetric — GitHub Profile Analyzer</title>
 <meta name="description" content="Analyse any GitHub profile: language breakdown, top repositories, totals and rate-limit status. GitHub REST API, vanilla JavaScript, ETag caching.">
+<meta name="theme-color" content="#0A0C10">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0C10'/%3E%3Crect x='14' y='34' width='9' height='16' rx='2' fill='%232EA043'/%3E%3Crect x='28' y='24' width='9' height='26' rx='2' fill='%232EA043'/%3E%3Crect x='42' y='14' width='9' height='36' rx='2' fill='%2356D364'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="site-header">
-  <div class="wrap">
-    <h1>DevMetric</h1>
-    <p class="tagline">GitHub Profile Analyzer — paste a username, get the numbers that matter.</p>
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="40" height="40"><rect width="64" height="64" rx="14" fill="#12161D"/><rect x="14" y="34" width="9" height="16" rx="2" fill="#2EA043"/><rect x="28" y="24" width="9" height="26" rx="2" fill="#2EA043"/><rect x="42" y="14" width="9" height="36" rx="2" fill="#56D364"/></svg>
+      </span>
+      <div>
+        <h1>DevMetric</h1>
+        <p class="tagline">GitHub Profile Analyzer</p>
+      </div>
+    </div>
+    <p class="header-credit">by <a href="https://github.com/abduIwahid" target="_blank" rel="noopener">Abdul Wahid</a></p>
   </div>
 </header>
+
+<section class="hero">
+  <div class="wrap">
+    <h2 class="hero-title">Any GitHub profile,<br><span class="accent-text">measured properly.</span></h2>
+    <p class="hero-sub">Paste a username — get the numbers GitHub itself doesn't show: how much of the work is original, which languages dominate, and what is actually active.</p>
+    <div class="hero-chips" aria-label="What DevMetric shows">
+      <span class="chip">Original-work %</span>
+      <span class="chip">Language breakdown</span>
+      <span class="chip">Top &amp; recent repos</span>
+      <span class="chip">Live API quota</span>
+    </div>
+  </div>
+</section>
 
 <div id="offline-banner" class="offline-banner" role="alert" hidden>
   You are offline. New analyses need a connection; profiles you already viewed may load from cache.
@@ -24,10 +50,20 @@
     <form id="search-form">
       <label for="username-input">GitHub username</label>
       <div class="search-row">
-        <input id="username-input" type="text" value="abduIwahid" placeholder="e.g. torvalds, gaearon, abduIwahid" autocomplete="off" spellcheck="false">
+        <span class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="username-input" type="text" value="abduIwahid" placeholder="e.g. torvalds, gaearon, abduIwahid" autocomplete="off" spellcheck="false">
+        </span>
         <button class="btn" type="submit">Analyse</button>
       </div>
     </form>
+    <div class="try-row">
+      <span class="try-label">Try:</span>
+      <button class="try-chip" type="button" data-try-user="torvalds">torvalds</button>
+      <button class="try-chip" type="button" data-try-user="gaearon">gaearon</button>
+      <button class="try-chip" type="button" data-try-user="sindresorhus">sindresorhus</button>
+      <button class="try-chip" type="button" data-try-user="abduIwahid">abduIwahid</button>
+    </div>
     <details class="settings">
       <summary>Optional: GitHub token (raises the limit from 60 to 5,000 requests/hour)</summary>
       <div class="settings-body">

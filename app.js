@@ -214,39 +214,41 @@ function showSkeleton() {
 function repoLi(r) {
   const pushed = new Date(r.pushedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   return '<li><a class="rname" href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.name) + '</a>' +
-    '<div class="rmeta">★ ' + r.stars + ' · Forks ' + r.forks + ' · ' + esc(r.language) + ' · Last push ' + pushed + '</div>' +
+    '<div class="rmeta">★ ' + r.stars + ' · ⑂ ' + r.forks + ' · <span class="lang-dot">●</span> ' + esc(r.language) + ' · Last push ' + pushed + '</div>' +
     (r.description ? '<p class="rdesc">' + esc(r.description) + '</p>' : '') + '</li>';
 }
 function renderResults(profile, agg) {
   hideStates();
   const langs = agg.languages.length
     ? agg.languages.map((l) =>
-      '<div class="lang-row"><span>' + esc(l.name) + '</span>' +
+      '<div class="lang-row"><span class="lang-name">' + esc(l.name) + '</span>' +
       '<span class="lang-track"><span class="lang-fill" style="width:' + Math.max(2, l.pct) + '%"></span></span>' +
       '<span class="pct">' + l.pct + '%</span></div>').join('')
     : '<p>No language data — every repository is a fork or has no detected language.</p>';
   el.results.innerHTML =
-    '<article class="profile-card">' +
+    '<article class="profile-card"><div class="profile-top">' +
     '<img src="' + esc(profile.avatarUrl) + '" alt="Avatar of ' + esc(profile.login) + '">' +
-    '<div class="profile-main"><h2>' + esc(profile.name) + '</h2>' +
+    '<div class="profile-main"><div class="profile-name-row"><h2>' + esc(profile.name) + '</h2>' +
+    '<a class="profile-link" href="' + esc(profile.profileUrl) + '" target="_blank" rel="noopener">View on GitHub ↗</a></div>' +
     '<p class="login">@' + esc(profile.login) + ' · joined ' + esc(profile.joined) + ' (' + profile.ageYears + ' years ago)</p>' +
     (profile.bio ? '<p class="bio">' + esc(profile.bio) + '</p>' : '') +
-    '<div class="stat-grid">' +
-    '<div class="stat"><b>' + profile.followers + '</b><span>Followers</span></div>' +
-    '<div class="stat"><b>' + profile.following + '</b><span>Following</span></div>' +
-    '<div class="stat"><b>' + profile.publicRepos + '</b><span>Public repos</span></div>' +
-    '<div class="stat"><b>' + agg.totalStars + '</b><span>Total stars (own repos)</span></div>' +
-    '<div class="stat"><b>' + agg.totalForks + '</b><span>Total forks (own repos)</span></div>' +
-    '</div></div></article>' +
-    '<section class="panel"><h3>Language breakdown <span style="color:var(--text-muted);font-weight:400">(share of own repos with a detected language)</span></h3>' + langs + '</section>' +
-    '<section class="panel"><h3>Footprint</h3><div class="stat-grid">' +
-    '<div class="stat"><b>' + agg.footprint.originalPct + '%</b><span>Original work (not forks)</span></div>' +
-    '<div class="stat"><b>' + agg.footprint.activeYear + '</b><span>Own repos pushed in the last year</span></div>' +
-    '<div class="stat"><b>' + esc(agg.footprint.topLanguage) + '</b><span>Most-used language</span></div>' +
+    '</div></div>' +
+    '<div class="stat-tiles">' +
+    '<div class="stat-tile"><b>' + profile.followers + '</b><span>Followers</span></div>' +
+    '<div class="stat-tile"><b>' + profile.following + '</b><span>Following</span></div>' +
+    '<div class="stat-tile"><b>' + profile.publicRepos + '</b><span>Public repos</span></div>' +
+    '<div class="stat-tile"><b>' + agg.totalStars + '</b><span>Total stars · own</span></div>' +
+    '<div class="stat-tile"><b>' + agg.totalForks + '</b><span>Total forks · own</span></div>' +
+    '</div></article>' +
+    '<section class="panel"><div class="panel-head"><h3>Language breakdown</h3><span class="panel-note">share of own repos with a detected language</span></div>' + langs + '</section>' +
+    '<section class="panel"><div class="panel-head"><h3>Footprint</h3><span class="panel-note">the numbers GitHub does not show</span></div><div class="footprint-grid">' +
+    '<div class="footprint-item"><b>' + agg.footprint.originalPct + '%</b><span>Original work (not forks)</span></div>' +
+    '<div class="footprint-item"><b>' + agg.footprint.activeYear + '</b><span>Own repos pushed in the last year</span></div>' +
+    '<div class="footprint-item"><b>' + esc(agg.footprint.topLanguage) + '</b><span>Most-used language</span></div>' +
     '</div></section>' +
-    '<section class="panel"><h3>Top repositories by stars</h3><ul class="repo-list">' +
+    '<section class="panel"><div class="panel-head"><h3>Top repositories by stars</h3></div><ul class="repo-list">' +
     (agg.topByStars.length ? agg.topByStars.map(repoLi).join('') : '<li>No repositories found.</li>') + '</ul></section>' +
-    '<section class="panel"><h3>Most recently pushed</h3><ul class="repo-list">' +
+    '<section class="panel"><div class="panel-head"><h3>Most recently pushed</h3></div><ul class="repo-list">' +
     (agg.recent.length ? agg.recent.map(repoLi).join('') : '<li>No repositories found.</li>') + '</ul></section>';
 }
 
@@ -254,6 +256,12 @@ function renderResults(profile, agg) {
 el.form.addEventListener('submit', (e) => {
   e.preventDefault();
   analyse(el.input.value);
+});
+document.querySelectorAll('[data-try-user]').forEach((b) => {
+  b.addEventListener('click', () => {
+    el.input.value = b.dataset.tryUser;
+    analyse(b.dataset.tryUser);
+  });
 });
 document.getElementById('error-retry').addEventListener('click', () => {
   if (state.username) analyse(state.username);
