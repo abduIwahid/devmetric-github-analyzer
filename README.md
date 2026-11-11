@@ -20,6 +20,10 @@ Run it locally: serve the folder (`python3 -m http.server`) and visit `http://lo
 - **ETag caching** — responses are cached in localStorage with their ETags. Repeat analyses send `If-None-Match`; a `304` reuses the cache and **does not consume rate limit**.
 - **Optional token** — a settings field stores a visitor-supplied token in localStorage only (see below).
 
+## Design
+
+Frontend redesigned 2026-11-11: GitHub-native dark hero over a light data surface, Sora display type with Inter UI text and JetBrains Mono for every number, stat tiles instead of a bare stat row, the Footprint numbers promoted to highlight tiles, one-tap sample usernames, and a bars-chart brand mark (also the favicon). Solid colours only — no gradients, no glass. Fluid `clamp()` sizing; verified at phone (414px) and desktop widths with a full analysis rendered.
+
 ## Engineering decisions
 
 - **N+1 avoidance is the headline.** GitHub offers a per-repo `/languages` endpoint with byte-accurate data — at one API call per repo. At the unauthenticated 60 requests/hour, analysing a 30-repo user that way would burn half the hourly quota on one profile. DevMetric aggregates the repo list's `language` field instead: the whole analysis costs 1 + ⌈repos/100⌉ calls.
