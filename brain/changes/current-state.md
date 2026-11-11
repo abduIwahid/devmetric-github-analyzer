@@ -11,3 +11,4 @@
 - 2026-11-11: Owner deployed DevMetric to GitHub Pages himself (abduiwahid.github.io/devmetric-github-analyzer) — the personal pass (Footprint + About) is confirmed live there. README live-demo line updated. Pages status of the other four repos was not enabled as of this check (404); deployment stays the owner's call.
 - 2026-11-11: Frontend redesign v2 shipped (dark hero, stat tiles, type system). Functionality unchanged. Owner guidance still open: Pages ON for the other four repos (his clicks); his own TMDB token unlocks CineLog's live check; nothing else needed from him for these five.
 - 2026-11-11 (later): Owner-directed cleanup + score — Try chips and token UI removed; Profile score (0–100 with breakdown) added; owner's own profile scores 80/100.
+- 2026-11-11 (scroll pass): bars animate on scroll-into-view (ring sweep + count-up + bar growth), hover depth added; verified with real wheel input.

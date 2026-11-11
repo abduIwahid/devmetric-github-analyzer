@@ -191,6 +191,7 @@ async function analyse(username) {
     const score = computeScore(profile, agg, repos);
     setBusy(false);
     renderResults(profile, agg, score);
+    armReveals();
     el.status.textContent = 'Analysis complete for ' + profile.login + (cacheHits ? ' (' + cacheHits + ' response' + (cacheHits > 1 ? 's' : '') + ' served from ETag cache)' : '') + '.';
   } catch (err) {
     if (err.name === 'AbortError') return;
@@ -264,7 +265,7 @@ function renderResults(profile, agg, score) {
     ? agg.languages.map((l) =>
       '<div class="lang-row"><span class="lang-name">' + esc(l.name) + '</span>' +
       '<span class="pct">' + l.pct + '%</span>' +
-      '<span class="lang-track"><span class="lang-fill" style="width:' + Math.max(2, l.pct) + '%"></span></span></div>').join('')
+      '<span class="lang-track"><span class="lang-fill" style="--w:' + Math.max(2, l.pct) + '%;width:' + Math.max(2, l.pct) + '%"></span></span></div>').join('')
     : '<p>No language data — every repository is a fork or has no detected language.</p>';
   el.results.innerHTML =
     '<article class="profile-card rise" style="--d:0ms"><div class="profile-top">' +
@@ -281,12 +282,12 @@ function renderResults(profile, agg, score) {
     '<div class="stat-tile"><b>' + agg.totalStars + '</b><span>Total stars · own</span></div>' +
     '<div class="stat-tile"><b>' + agg.totalForks + '</b><span>Total forks · own</span></div>' +
     '</div></article>' +
-    '<section class="panel score-panel rise" style="--d:60ms"><div class="score-main"><div class="score-ring" style="--score-pct:' + score.total + '"><span class="score-num">' + score.total + '</span></div>' +
+    '<section class="panel score-panel rise" style="--d:60ms"><div class="score-main"><div class="score-ring" style="--score-pct:' + score.total + ';--score-to:' + score.total + '"><span class="score-num" data-count="' + score.total + '">0</span></div>' +
     '<div class="score-head"><h3>Profile score</h3><p class="score-grade">' + score.grade + ' · out of 100</p>' +
     '<p class="panel-note">DevMetric\'s own summary of the metrics above — originality, activity, reach, craft and longevity. Not an official GitHub measure.</p></div></div>' +
     '<div class="score-parts">' + score.parts.map((p) =>
       '<div class="score-part"><div class="score-part-top"><span class="score-part-label">' + p.label + '</span><span class="score-part-val">' + p.got + '/' + p.max + '</span></div>' +
-      '<span class="lang-track"><span class="lang-fill" style="width:' + Math.round(p.got / p.max * 100) + '%"></span></span>' +
+      '<span class="lang-track"><span class="lang-fill" style="--w:' + Math.round(p.got / p.max * 100) + '%;width:' + Math.round(p.got / p.max * 100) + '%"></span></span>' +
       '<span class="score-part-note">' + esc(p.note) + '</span></div>').join('') + '</div></section>' +
     '<section class="panel rise" style="--d:120ms"><div class="panel-head"><h3>Language breakdown</h3><span class="panel-note">share of own repos with a detected language</span></div>' + langs + '</section>' +
     '<section class="panel rise" style="--d:180ms"><div class="panel-head"><h3>Footprint</h3><span class="panel-note">the numbers GitHub does not show</span></div><div class="footprint-grid">' +
@@ -305,6 +306,40 @@ el.form.addEventListener('submit', (e) => {
   e.preventDefault();
   analyse(el.input.value);
 });
+/* ---------- scroll-triggered reveal ----------
+ * Panels start with their bars at zero; when a panel scrolls into
+ * view it gets .inview, the bars grow to their real widths, and the
+ * score ring sweeps while its number counts up. Without
+ * IntersectionObserver (or with reduced motion) everything simply
+ * renders in its final state — the reveal is an enhancement only. */
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function countUp(elm, target) {
+  const t0 = performance.now();
+  const dur = 1100;
+  function tick(t) {
+    const k = Math.min(1, (t - t0) / dur);
+    elm.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+    if (k < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+let revealObserver = null;
+function armReveals() {
+  if (!('IntersectionObserver' in window) || reduceMotion) return;
+  document.body.classList.add('reveal-ready');
+  if (revealObserver) revealObserver.disconnect();
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('inview');
+      const num = entry.target.querySelector('.score-num[data-count]');
+      if (num && !num.dataset.done) { num.dataset.done = '1'; countUp(num, parseInt(num.dataset.count, 10) || 0); }
+      revealObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.25 });
+  document.querySelectorAll('#results-region .panel, #results-region .score-ring').forEach((p) => revealObserver.observe(p));
+}
+
 function updateOffline() { el.offline.hidden = navigator.onLine; }
 window.addEventListener('online', updateOffline);
 window.addEventListener('offline', updateOffline);
