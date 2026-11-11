@@ -263,8 +263,8 @@ function renderResults(profile, agg, score) {
   const langs = agg.languages.length
     ? agg.languages.map((l) =>
       '<div class="lang-row"><span class="lang-name">' + esc(l.name) + '</span>' +
-      '<span class="lang-track"><span class="lang-fill" style="width:' + Math.max(2, l.pct) + '%"></span></span>' +
-      '<span class="pct">' + l.pct + '%</span></div>').join('')
+      '<span class="pct">' + l.pct + '%</span>' +
+      '<span class="lang-track"><span class="lang-fill" style="width:' + Math.max(2, l.pct) + '%"></span></span></div>').join('')
     : '<p>No language data — every repository is a fork or has no detected language.</p>';
   el.results.innerHTML =
     '<article class="profile-card rise" style="--d:0ms"><div class="profile-top">' +

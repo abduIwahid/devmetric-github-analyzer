@@ -28,3 +28,11 @@ of 100, so analysing a profile yields a score.
 - Score exercised on the owner's real payloads: 80/100 "Strong"
   (Originality 24, Activity 25, Reach 14, Craft 13, Longevity 4;
   parts sum to the total).
+
+## Addendum — premium pass + language layout (same day)
+Premium pass shipped in the same commit (eabc266): SVG icons for
+star/fork/external-link (no glyph characters), staggered rise-in on
+panels, hover lifts/washes, button loading state, designed dark
+footer; live-verified on Pages. Language rows then restructured to
+the two-line layout (label+% line, full-width bar) because the
+three-column intrinsic-track grid was what Safari kept mangling.
