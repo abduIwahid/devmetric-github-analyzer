@@ -57,25 +57,6 @@
         <button class="btn" type="submit">Analyse</button>
       </div>
     </form>
-    <div class="try-row">
-      <span class="try-label">Try:</span>
-      <button class="try-chip" type="button" data-try-user="torvalds">torvalds</button>
-      <button class="try-chip" type="button" data-try-user="gaearon">gaearon</button>
-      <button class="try-chip" type="button" data-try-user="sindresorhus">sindresorhus</button>
-      <button class="try-chip" type="button" data-try-user="abduIwahid">abduIwahid</button>
-    </div>
-    <details class="settings">
-      <summary>Optional: GitHub token (raises the limit from 60 to 5,000 requests/hour)</summary>
-      <div class="settings-body">
-        <label for="token-input">Personal access token — stored only in this browser's localStorage, sent only to api.github.com</label>
-        <div class="search-row">
-          <input id="token-input" type="password" placeholder="ghp_… (leave empty to go tokenless)" autocomplete="off">
-          <button id="token-save" class="btn btn-secondary" type="button">Save token</button>
-          <button id="token-clear" class="btn btn-secondary" type="button">Clear</button>
-        </div>
-        <p id="token-status" class="hint"></p>
-      </div>
-    </details>
     <p id="quota-line" class="quota-line" role="status"></p>
   </section>
 
@@ -102,8 +83,22 @@
 </section>
 
 <footer class="site-footer">
-  <div class="wrap">
-    <p>Data from the <a href="https://docs.github.com/en/rest" target="_blank" rel="noopener">GitHub REST API</a> (public data only). Repeat views are served through ETag conditional requests, which do not count against the rate limit when nothing changed.</p>
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="30" height="30"><rect width="64" height="64" rx="14" fill="#12161D"/><rect x="14" y="34" width="9" height="16" rx="2" fill="#2EA043"/><rect x="28" y="24" width="9" height="26" rx="2" fill="#2EA043"/><rect x="42" y="14" width="9" height="36" rx="2" fill="#56D364"/></svg>
+      </span>
+      <span class="footer-word">DevMetric</span>
+    </div>
+    <p class="footer-note">Data from the <a href="https://docs.github.com/en/rest" target="_blank" rel="noopener">GitHub REST API</a> (public data only). Repeat views are served through ETag conditional requests, which do not count against the rate limit when nothing changed.</p>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="https://github.com/abduIwahid" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.abdulwahid.me" target="_blank" rel="noopener">abdulwahid.me</a>
+      <a href="https://github.com/abduIwahid/devmetric-github-analyzer" target="_blank" rel="noopener">Source</a>
+    </nav>
+  </div>
+  <div class="footer-base wrap">
+    <span>Built by Abdul Wahid — vanilla JavaScript, no dependencies.</span>
   </div>
 </footer>
 

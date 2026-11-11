@@ -29,8 +29,8 @@ JetBrains Mono (numbers, usernames, repo meta, quota line). Fluid
 
 **Component states:**
 - Quota line: mono, normal / low (≤5 remaining, turns danger red).
-- Settings: collapsed `<details>` so the token field never dominates; status line confirms saved/cleared.
-- Try chips: one-tap sample usernames (recognition over recall).
+- Profile score panel: conic score ring (solid accent sweep — a data dial, not decoration) + five labelled component bars with the evidence for each; the panel states plainly that the score is DevMetric's own summary, not an official GitHub measure.
+- Removed 2026-11-11 on the owner's order: the Try chips and the token settings section — the frontend is one search box and the results, nothing else asking for attention. (The fetch layer still honours a pre-existing localStorage token; the 60/hour quota line remains because it is information, not input.)
 - Skeleton profile with a soft pulse while loading (disabled under reduced motion); 404 empty state; error state with retry; offline banner.
 - Language bars animate width on render (transition removed under `prefers-reduced-motion`); percentage always also shown as text.
 - Footprint panel: three accent-soft highlight tiles — the signature numbers get the Von Restorff slot.

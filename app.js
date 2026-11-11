@@ -18,8 +18,6 @@ const state = { username: null, quota: null };
 const el = {
   form: document.getElementById('search-form'),
   input: document.getElementById('username-input'),
-  tokenInput: document.getElementById('token-input'),
-  tokenStatus: document.getElementById('token-status'),
   quota: document.getElementById('quota-line'),
   status: document.getElementById('status-region'),
   results: document.getElementById('results-region'),
@@ -159,6 +157,13 @@ function aggregateRepos(repos) {
 }
 
 /* ---------- load ---------- */
+function setBusy(busy) {
+  const btn = document.querySelector('#search-form button[type="submit"]');
+  if (!btn) return;
+  btn.disabled = busy;
+  btn.classList.toggle('is-loading', busy);
+  btn.textContent = busy ? 'Analysing…' : 'Analyse';
+}
 let loadController = null;
 async function analyse(username) {
   const name = username.trim();
@@ -168,6 +173,7 @@ async function analyse(username) {
   loadController = new AbortController();
   hideStates();
   showSkeleton();
+  setBusy(true);
   el.status.textContent = 'Analysing ' + name + '…';
   try { history.replaceState(null, '', '?user=' + encodeURIComponent(name)); } catch (e) { /* file:// */ }
   try {
@@ -182,10 +188,13 @@ async function analyse(username) {
       if (pageRes.data.length < 100) break; // short page = last page
     }
     const agg = aggregateRepos(repos);
-    renderResults(profile, agg);
+    const score = computeScore(profile, agg, repos);
+    setBusy(false);
+    renderResults(profile, agg, score);
     el.status.textContent = 'Analysis complete for ' + profile.login + (cacheHits ? ' (' + cacheHits + ' response' + (cacheHits > 1 ? 's' : '') + ' served from ETag cache)' : '') + '.';
   } catch (err) {
     if (err.name === 'AbortError') return;
+    setBusy(false);
     el.results.innerHTML = '';
     if (err.status === 404) {
       el.emptyText.textContent = 'GitHub returned 404 for "' + name + '". Check the spelling — usernames are a single word with hyphens allowed.';
@@ -193,7 +202,7 @@ async function analyse(username) {
       el.empty.hidden = false;
     } else if (err.status === 403 || err.status === 429) {
       const when = err.resetAt ? ' Quota resets at ' + err.resetAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '.' : '';
-      showError('GitHub rate limit reached.' + when + ' Add a free personal token in the settings above to raise the limit to 5,000 requests/hour, or wait for the reset.');
+      showError('GitHub rate limit reached.' + when + ' Wait for the reset — the free unauthenticated limit is 60 requests per hour.');
     } else {
       showError('Could not reach the GitHub API. Check your connection and try again.');
     }
@@ -211,13 +220,45 @@ function showError(msg) {
 function showSkeleton() {
   el.results.innerHTML = '<div class="skeleton"><div class="skel skel-avatar"></div><div class="skel skel-line"></div><div class="skel skel-line short"></div><div class="skel skel-line"></div></div>';
 }
+/* Inline SVG icons (stroke style, currentColor) — no emoji, no icon font. */
+const ICON_STAR = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 3.6l2.5 5.2 5.7.7-4.2 3.9 1.1 5.6L12 16.3 6.9 19l1.1-5.6L3.8 9.5l5.7-.7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+const ICON_FORK = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><circle cx="6" cy="5.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="18.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="5.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 7.8v8.4M18 7.8c0 4.6-4.9 5-8.6 5.3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+const ICON_EXT = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M14 4h6v6M20 4L11 13M9 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 function repoLi(r) {
   const pushed = new Date(r.pushedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   return '<li><a class="rname" href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.name) + '</a>' +
-    '<div class="rmeta">★ ' + r.stars + ' · ⑂ ' + r.forks + ' · <span class="lang-dot">●</span> ' + esc(r.language) + ' · Last push ' + pushed + '</div>' +
+    '<div class="rmeta"><span class="rmeta-item">' + ICON_STAR + r.stars + '</span><span class="rmeta-item">' + ICON_FORK + r.forks + '</span>' +
+      (r.language ? '<span class="rmeta-item"><span class="lang-dot"></span>' + esc(r.language) + '</span>' : '') +
+      '<span class="rmeta-item">Last push ' + pushed + '</span></div>' +
     (r.description ? '<p class="rdesc">' + esc(r.description) + '</p>' : '') + '</li>';
 }
-function renderResults(profile, agg) {
+/* ---------- profile score (0-100) ----------
+ * A transparent heuristic from data already fetched — no extra calls.
+ * Originality 30 · Activity 25 · Reach 20 · Craft 15 · Longevity 10.
+ * It is an opinionated summary of this app's own metrics, not an
+ * official GitHub measure; the breakdown is always shown with it. */
+function computeScore(profile, agg, repos) {
+  const parts = [];
+  const own = repos.filter((r) => !r.fork);
+  const originality = Math.round(agg.footprint.originalPct / 100 * 30);
+  parts.push({ label: 'Originality', got: originality, max: 30, note: agg.footprint.originalPct + '% original work' });
+  const activity = Math.min(25, Math.round(agg.footprint.activeYear / 20 * 25));
+  parts.push({ label: 'Activity', got: activity, max: 25, note: agg.footprint.activeYear + ' repos pushed in the last year' });
+  const reachRaw = profile.followers * 2 + agg.totalStars * 5 + agg.totalForks * 3;
+  const reach = Math.min(20, Math.round(Math.log10(1 + reachRaw) / Math.log10(1 + 220) * 20));
+  parts.push({ label: 'Reach', got: reach, max: 20, note: profile.followers + ' followers, ' + agg.totalStars + ' stars earned' });
+  const described = own.filter((r) => r.description).length;
+  const withLang = own.filter((r) => r.language).length;
+  const craft = own.length ? Math.round(((described + withLang) / (2 * own.length)) * 15) : 0;
+  parts.push({ label: 'Craft', got: craft, max: 15, note: described + ' of ' + own.length + ' own repos carry a description' });
+  const longevity = Math.min(10, Math.round(parseFloat(profile.ageYears) / 5 * 10));
+  parts.push({ label: 'Longevity', got: longevity, max: 10, note: profile.ageYears + ' years on GitHub' });
+  const total = parts.reduce((a, p) => a + p.got, 0);
+  const grade = total >= 85 ? 'Exceptional' : total >= 70 ? 'Strong' : total >= 50 ? 'Solid' : total >= 30 ? 'Emerging' : 'Just starting';
+  return { total, grade, parts };
+}
+function renderResults(profile, agg, score) {
   hideStates();
   const langs = agg.languages.length
     ? agg.languages.map((l) =>
@@ -226,10 +267,10 @@ function renderResults(profile, agg) {
       '<span class="pct">' + l.pct + '%</span></div>').join('')
     : '<p>No language data — every repository is a fork or has no detected language.</p>';
   el.results.innerHTML =
-    '<article class="profile-card"><div class="profile-top">' +
+    '<article class="profile-card rise" style="--d:0ms"><div class="profile-top">' +
     '<img src="' + esc(profile.avatarUrl) + '" alt="Avatar of ' + esc(profile.login) + '">' +
     '<div class="profile-main"><div class="profile-name-row"><h2>' + esc(profile.name) + '</h2>' +
-    '<a class="profile-link" href="' + esc(profile.profileUrl) + '" target="_blank" rel="noopener">View on GitHub ↗</a></div>' +
+    '<a class="profile-link" href="' + esc(profile.profileUrl) + '" target="_blank" rel="noopener">View on GitHub ' + ICON_EXT + '</a></div>' +
     '<p class="login">@' + esc(profile.login) + ' · joined ' + esc(profile.joined) + ' (' + profile.ageYears + ' years ago)</p>' +
     (profile.bio ? '<p class="bio">' + esc(profile.bio) + '</p>' : '') +
     '</div></div>' +
@@ -240,15 +281,22 @@ function renderResults(profile, agg) {
     '<div class="stat-tile"><b>' + agg.totalStars + '</b><span>Total stars · own</span></div>' +
     '<div class="stat-tile"><b>' + agg.totalForks + '</b><span>Total forks · own</span></div>' +
     '</div></article>' +
-    '<section class="panel"><div class="panel-head"><h3>Language breakdown</h3><span class="panel-note">share of own repos with a detected language</span></div>' + langs + '</section>' +
-    '<section class="panel"><div class="panel-head"><h3>Footprint</h3><span class="panel-note">the numbers GitHub does not show</span></div><div class="footprint-grid">' +
+    '<section class="panel score-panel rise" style="--d:60ms"><div class="score-main"><div class="score-ring" style="--score-pct:' + score.total + '"><span class="score-num">' + score.total + '</span></div>' +
+    '<div class="score-head"><h3>Profile score</h3><p class="score-grade">' + score.grade + ' · out of 100</p>' +
+    '<p class="panel-note">DevMetric\'s own summary of the metrics above — originality, activity, reach, craft and longevity. Not an official GitHub measure.</p></div></div>' +
+    '<div class="score-parts">' + score.parts.map((p) =>
+      '<div class="score-part"><div class="score-part-top"><span class="score-part-label">' + p.label + '</span><span class="score-part-val">' + p.got + '/' + p.max + '</span></div>' +
+      '<span class="lang-track"><span class="lang-fill" style="width:' + Math.round(p.got / p.max * 100) + '%"></span></span>' +
+      '<span class="score-part-note">' + esc(p.note) + '</span></div>').join('') + '</div></section>' +
+    '<section class="panel rise" style="--d:120ms"><div class="panel-head"><h3>Language breakdown</h3><span class="panel-note">share of own repos with a detected language</span></div>' + langs + '</section>' +
+    '<section class="panel rise" style="--d:180ms"><div class="panel-head"><h3>Footprint</h3><span class="panel-note">the numbers GitHub does not show</span></div><div class="footprint-grid">' +
     '<div class="footprint-item"><b>' + agg.footprint.originalPct + '%</b><span>Original work (not forks)</span></div>' +
     '<div class="footprint-item"><b>' + agg.footprint.activeYear + '</b><span>Own repos pushed in the last year</span></div>' +
     '<div class="footprint-item"><b>' + esc(agg.footprint.topLanguage) + '</b><span>Most-used language</span></div>' +
     '</div></section>' +
-    '<section class="panel"><div class="panel-head"><h3>Top repositories by stars</h3></div><ul class="repo-list">' +
+    '<section class="panel rise" style="--d:240ms"><div class="panel-head"><h3>Top repositories by stars</h3></div><ul class="repo-list">' +
     (agg.topByStars.length ? agg.topByStars.map(repoLi).join('') : '<li>No repositories found.</li>') + '</ul></section>' +
-    '<section class="panel"><div class="panel-head"><h3>Most recently pushed</h3></div><ul class="repo-list">' +
+    '<section class="panel rise" style="--d:300ms"><div class="panel-head"><h3>Most recently pushed</h3></div><ul class="repo-list">' +
     (agg.recent.length ? agg.recent.map(repoLi).join('') : '<li>No repositories found.</li>') + '</ul></section>';
 }
 
@@ -257,38 +305,10 @@ el.form.addEventListener('submit', (e) => {
   e.preventDefault();
   analyse(el.input.value);
 });
-document.querySelectorAll('[data-try-user]').forEach((b) => {
-  b.addEventListener('click', () => {
-    el.input.value = b.dataset.tryUser;
-    analyse(b.dataset.tryUser);
-  });
-});
-document.getElementById('error-retry').addEventListener('click', () => {
-  if (state.username) analyse(state.username);
-});
-function refreshTokenStatus() {
-  el.tokenStatus.textContent = getToken()
-    ? 'A token is saved in this browser and will be sent with requests.'
-    : 'No token saved — requests run at the 60/hour unauthenticated limit.';
-}
-document.getElementById('token-save').addEventListener('click', () => {
-  const v = el.tokenInput.value.trim();
-  try {
-    if (v) localStorage.setItem(LS_TOKEN, v);
-    el.tokenInput.value = '';
-  } catch (e) { /* ignore */ }
-  refreshTokenStatus();
-});
-document.getElementById('token-clear').addEventListener('click', () => {
-  try { localStorage.removeItem(LS_TOKEN); } catch (e) { /* ignore */ }
-  refreshTokenStatus();
-});
-
 function updateOffline() { el.offline.hidden = navigator.onLine; }
 window.addEventListener('online', updateOffline);
 window.addEventListener('offline', updateOffline);
 
-refreshTokenStatus();
 updateOffline();
 // Shareable URL: auto-load only when ?user= is present; otherwise wait.
 const params = new URLSearchParams(window.location.search);
