@@ -5,7 +5,7 @@
 
 Enter any GitHub username and get a real analysis: profile summary, language breakdown, top and most recent repositories, total stars and forks — plus live rate-limit status. Recruiters can try it with their own username; the link is shareable (`?user=anyone`).
 
-**Live demo:** _TBD — deploy pending owner decision (GitHub Pages or Vercel static)._
+**Live demo:** https://abduiwahid.github.io/devmetric-github-analyzer/ (GitHub Pages, deployed by the owner)
 Run it locally: serve the folder (`python3 -m http.server`) and visit `http://localhost:8000`. (Serve over HTTP rather than `file://` so the shareable-URL feature works.)
 
 ## Features
